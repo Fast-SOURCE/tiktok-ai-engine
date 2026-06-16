@@ -5,12 +5,21 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "client/src"),
-      "@shared": path.resolve(__dirname, "shared"),
-      // Redirect trpc to mock version for static deployment
-      "@/lib/trpc": path.resolve(__dirname, "client/src/lib/trpc.mock.ts"),
-    },
+    alias: [
+      // IMPORTANT: Must come BEFORE the '@' alias to intercept @/lib/trpc imports
+      {
+        find: /^.*\/lib\/trpc$/,
+        replacement: path.resolve(__dirname, "client/src/lib/trpc.mock.ts"),
+      },
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "client/src"),
+      },
+      {
+        find: "@shared",
+        replacement: path.resolve(__dirname, "shared"),
+      },
+    ],
   },
   root: path.resolve(__dirname, "client"),
   build: {
